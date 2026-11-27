@@ -9,7 +9,7 @@ This is a community setup, not an official release from Thinking Machines, ISTA-
 - Windows with WSL2, Ubuntu 24.04 x86-64, and an NVIDIA Windows driver supporting CUDA 13.0. `/dev/dxg` and `/usr/lib/wsl/lib` must be available. Install the GPU driver on Windows; do not install a Linux display driver in WSL.
 - CUDA Toolkit **13.0** (the reference build used **13.0.2**), GCC/G++ **13**, Python **3.12**, CMake, Ninja, Git, curl, bubblewrap, and Python venv support.
 - Working unprivileged user namespaces for bubblewrap. The launcher fails closed if the sandbox cannot start. It does not fall back to an unrestricted process.
-- Sufficient system RAM, GPU memory and SSD space. Plan for at least **100 GB free** for both upstream reconstructions, intermediates, source and build. Full SHA verification reads tens of GB. Avoid concurrent conversion, hashing and GPU benchmarks. The default 270336-token cap is a tested configuration on the reference machine, not a promise that every GPU can fit it.
+- Sufficient system RAM, GPU memory and SSD space. Plan for at least **100 GB free** for both upstream reconstructions, intermediates, source and build. Full SHA verification reads tens of GB. Avoid concurrent conversion, hashing and GPU benchmarks. The GSQ default is 393216 total tokens (384K). MX8 uses 270336. Available context depends on the GPU and host memory.
 
 Ubuntu system packages (CUDA is a separate prerequisite):
 
@@ -63,18 +63,19 @@ python3 scripts/serve.py --profile mx8
 
 The foreground launcher holds a lock in the state directory and hashes the binary and selected pack before starting. This coordinates launches that share a state directory; it does not discover or stop unrelated GPU workloads. Stop other GPU workloads yourself before measuring performance.
 
-Both profiles use these defaults:
+The profiles use these defaults:
 
 | Setting | Value |
 | --- | --- |
-| Context cap | 270336 total tokens |
+| Context cap | 393216 total tokens for GSQ, 270336 for MX8 |
+| Expert cache | 450 for GSQ at 393216, automatic otherwise |
 | KV cache | FP8 |
 | DFlash speculative window | 8 |
 | Suffix/prompt-lookup draft | 0 |
 | Parallel slots | 1 |
 | Vision | off |
 | CPU workers | 10 |
-| VRAM reserve | 512 MiB |
+| VRAM reserve | 768 MiB for GSQ at 393216, 512 MiB otherwise |
 | RAM reserve | 4096 MiB |
 | Token fitting | `--fit-max-tokens` |
 | API model alias | `inkling-2-mini` for both profiles |
@@ -86,11 +87,11 @@ python3 scripts/serve.py --profile gsq --dry-run
 python3 scripts/serve.py --profile mx8 --context 131072 --dry-run
 ```
 
-An explicit `--context N` overrides the default. It is constrained to 1024–1048576, the model's declared upper bound. A larger accepted argument is **not** evidence that a full prompt fits, is fast, or has been validated. Context includes prompt and generated tokens. `--fit-max-tokens` may reduce an excessive output budget; it does not extend the configured cap. Full context-length validation and machine-specific memory results should be recorded separately.
+For the smaller GSQ configuration, run `python3 scripts/serve.py --profile gsq --context 270336`. The `--context` option accepts caps from 1024 to the model's 1048576-token limit. The cap includes prompt and generated tokens. `--fit-max-tokens` caps output at the remaining window. GSQ at 393216 defaults to 450 GPU experts and a 768 MiB VRAM reserve. Other contexts default to automatic expert sizing and a 512 MiB VRAM reserve. Explicit `--expert-cache` and `--vram-reserve-mib` values take precedence. Check full prompt fit at your chosen context.
 
 ## RTX 5080 measurements
 
-The reference machine used a 16 GiB RTX 5080, 32 GiB of system RAM and Ubuntu under WSL2. With the default 270336-token limit, the same Basalt build and DFlash 2 ran identical Pi requests with 265477 cached tokens and 1973 new tokens. Each number below is the median of six continuations.
+The reference machine used a 16 GiB RTX 5080, 32 GiB of system RAM and Ubuntu under WSL2. With the historical 270336-token limit, the same Basalt build and DFlash 2 ran identical Pi requests with 265477 cached tokens and 1973 new tokens. Each number below is the median of six continuations.
 
 | Profile | Decode | Full warm Pi turn |
 | --- | ---: | ---: |
@@ -104,7 +105,9 @@ python3 scripts/serve.py --profile gsq --context 393216 \
   --expert-cache 450 --vram-reserve-mib 768
 ```
 
-The automatic planner reached 589824 tokens at startup in one run. Full runs above 393216 on the reference machine were constrained by Windows RAM or GPU headroom. At 655360 and 1048576, the 512 MiB-reserve planner reported VRAM deficits of 686 and 6830 MiB with every expert in RAM. FP8 full-attention KV uses about 16 KiB per token on the GPU. At 1048576 tokens the full-attention KV alone is about 16 GiB, before the fixed model, drafter and workspace allocations. Use the default for the measured Pi speed.
+A later cold restart recovered all three markers from the same 385003-token prompt in 145.16 s. A separate Pi run started cold with 385344 input tokens and passed five warm continuations with at least 385343 cached tokens. Median decode was **66.2 tokens/s** and median full warm turn was **16.62 s**. Each continuation passed the Python code check and replayed reasoning. A separate continuation requested a 32768-token output limit and completed with token fitting. The minimum available **Windows system RAM** in the Pi run was 3046 MiB. The 768 MiB setting is a separate **GPU VRAM** reserve.
+
+The automatic planner reached 589824 tokens at startup in one run. Full runs above 393216 on the reference machine were constrained by Windows RAM or GPU headroom. At 655360 and 1048576, the 512 MiB-reserve planner reported VRAM deficits of 686 and 6830 MiB with every expert in RAM. FP8 full-attention KV uses about 16 KiB per token on the GPU. At 1048576 tokens the full-attention KV alone is about 16 GiB, before the fixed model, drafter and workspace allocations.
 
 ## API and health smoke
 
@@ -112,10 +115,12 @@ Basalt listens only on `127.0.0.1:8191` **inside a private network namespace**. 
 
 ```bash
 curl --unix-socket "$INKLING_STATE/run/inference.sock" http://localhost/health
-bash scripts/smoke.sh 270336
+bash scripts/smoke.sh
+# Or require an exact cap:
+bash scripts/smoke.sh 393216
 ```
 
-For an override, pass the same number to `smoke.sh`. The smoke checks loaded state, model alias and context, then asks `17 * 23` and requires a final answer containing `391` with finish reason `stop`. It saves Git revision, exact command, request, health, response and expected/observed result under `$INKLING_STATE/smoke-<UTC timestamp>/`. This is a short inference check, not a long-context benchmark.
+With no argument, `smoke.sh` reads and validates the served context from health, so it works with either profile. To require an exact cap, pass that number to `smoke.sh`. The smoke checks loaded state, model alias and context, then asks `17 * 23` and requires a final answer containing `391` with finish reason `stop`. It saves Git revision, exact command, request, health, response and expected/observed result under `$INKLING_STATE/smoke-<UTC timestamp>/`. This is a short inference check, not a long-context benchmark.
 
 For tools that require TCP, opt into a host-side **loopback-only** bridge in a second terminal:
 
@@ -127,7 +132,7 @@ python3 scripts/relay.py --socket "$INKLING_STATE/run/inference.sock" --port 819
 
 The bridge has no API authentication. Keep it bound to loopback; it intentionally exposes no `--host` option. Other local processes can access it. Ctrl-C stops the bridge; stop the model separately in its foreground terminal.
 
-For Pi, merge the provider from [examples/pi-models.json](examples/pi-models.json) into your Pi `models.json`. Start the loopback bridge first, then use provider `inkling`, model `inkling-2-mini`. Set `contextWindow` to the limit you actually serve. Preserve the assistant's `reasoning_content` in later OpenAI-compatible requests, including after tool calls. Pi's native OpenAI-compatible path replayed that field in the benchmark. Keep any agent tool sandbox on the Pi side of the bridge.
+For Pi, merge the provider from [examples/pi-models.json](examples/pi-models.json) into your Pi `models.json`. Start the loopback bridge first, then use provider `inkling`, model `inkling-2-mini`. The example uses the GSQ default of 393216. Set `contextWindow` to the limit you actually serve: 270336 for MX8 or the GSQ fallback, or your explicit context override. Preserve the assistant's `reasoning_content` in later OpenAI-compatible requests, including after tool calls. Pi's native OpenAI-compatible path replayed that field in the benchmark. Keep any agent tool sandbox on the Pi side of the bridge.
 
 The sandbox exposes only read-only system libraries, CUDA, Basalt source/binary, venv, launcher scripts and the selected model, plus the WSL GPU device. It has a temporary HOME and temporary filesystem. The sole host-writable mount is its private `run/` bridge directory; personal homes and Windows drives are absent. GPU drivers and the host kernel remain shared, so this is process/filesystem/network isolation rather than a virtual machine security boundary.
 

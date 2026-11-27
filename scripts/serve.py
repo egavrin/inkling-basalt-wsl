@@ -16,7 +16,13 @@ REFERENCE = {'gsq': '1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6
              'mx8': '5c1f52101cd598c1578832f6c17c20a9c72a0a50ede0839b31d971369301907a'}
 
 
-def command(profile, context, expert_cache=None, vram_reserve_mib=512):
+def command(profile, context=None, expert_cache=None, vram_reserve_mib=None):
+    context = context if context is not None else (393216 if profile == 'gsq' else 270336)
+    tuned = profile == 'gsq' and context == 393216
+    if expert_cache is None and tuned:
+        expert_cache = 450
+    if vram_reserve_mib is None:
+        vram_reserve_mib = 768 if tuned else 512
     args = ['/basalt/bin/basalt', 'serve', '/model/' + NAMES[profile],
             '--alias', 'inkling-2-mini', '--host', '127.0.0.1', '--port', '8191',
             '--parallel', '1', '--max-context', str(context), '--kv', 'fp8', '--spec', '8',
@@ -42,16 +48,16 @@ def sandbox(cuda):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--profile', choices=NAMES, default='gsq')
-    ap.add_argument('--context', type=int, default=270336,
-                    help='explicit total context cap; larger values require independent memory validation')
+    ap.add_argument('--context', type=int,
+                    help='total context cap (GSQ: 393216; MX8: 270336); GSQ fallback: 270336')
     ap.add_argument('--expert-cache', type=int,
-                    help='explicit expert-cache count (1-3072); omitted uses Basalt automatic sizing')
-    ap.add_argument('--vram-reserve-mib', type=int, choices=(512, 768, 1024), default=512,
-                    help='VRAM reserve in MiB (default: 512)')
+                    help='expert-cache count (1-3072); default: 450 for GSQ at 393216, automatic otherwise')
+    ap.add_argument('--vram-reserve-mib', type=int, choices=(512, 768, 1024),
+                    help='VRAM reserve in MiB (GSQ at 393216: 768; otherwise: 512)')
     ap.add_argument('--dry-run', action='store_true', help='print contract without loading files or GPU')
     ap.add_argument('--check-sandbox', action='store_true', help='check namespace visibility without loading the model')
     a = ap.parse_args()
-    if not 1024 <= a.context <= 1048576:
+    if a.context is not None and not 1024 <= a.context <= 1048576:
         ap.error('context must be between 1024 and the model limit 1048576')
     if a.expert_cache is not None and not 1 <= a.expert_cache <= 3072:
         ap.error('expert-cache must be between 1 and 3072')

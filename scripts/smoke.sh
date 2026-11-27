@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source "$(dirname -- "$0")/common.sh"
-context=${1:-270336}
+context=${1:-auto}
 socket="$STATE/run/inference.sock"
 out="$STATE/smoke-$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir "$out"
@@ -11,7 +11,10 @@ python3 - "$out/health.json" "$context" <<'PY'
 import json,sys
 h=json.load(open(sys.argv[1]))
 assert h['loaded'] is True and h['loading'] is False, h
-assert h['model']=='inkling-2-mini' and h['max_context']==int(sys.argv[2]), h
+assert h['model']=='inkling-2-mini', h
+assert type(h['max_context']) is int and 1024 <= h['max_context'] <= 1048576, h
+if sys.argv[2] != 'auto':
+    assert h['max_context']==int(sys.argv[2]), h
 PY
 printf '%s\n' '{"model":"inkling-2-mini","messages":[{"role":"user","content":"Calculate 17 * 23. End your answer with the number."}],"temperature":0,"max_tokens":256,"stream":false}' > "$out/request.json"
 curl --fail --silent --show-error --max-time 300 --unix-socket "$socket" \
