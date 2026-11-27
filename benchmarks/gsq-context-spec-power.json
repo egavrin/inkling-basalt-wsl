@@ -1,0 +1,380 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-27",
+  "hardware": {
+    "gpu": "RTX 5080",
+    "gpu_gib": 16,
+    "system_ram_gib": 32,
+    "environment": "Ubuntu under WSL2"
+  },
+  "provenance": {
+    "basalt_tree": "0026804d2191e2c55ff7cb4d9eddfa122f4ac511",
+    "binary_sha256": "c9240671880aed9f5c8074278285169e578b7c83a7fb93ca6a46f3f4158486cc",
+    "model": "Inkling-2-Mini-GSQ-RCO-IQ3_S-DFlash2.basalt",
+    "model_bytes": 13451914797,
+    "model_sha256": "1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6c680e"
+  },
+  "shared_settings": {
+    "max_context_tokens": 270336,
+    "kv": "fp8",
+    "drafter": "DFlash 2",
+    "suffix_draft": 0,
+    "parallel_requests": 1,
+    "expert_cache": "auto"
+  },
+  "context_and_spec": {
+    "settings": {
+      "vram_reserve_mib": 768,
+      "pool_workers": 8,
+      "enforced_limit_w": 360
+    },
+    "method": {
+      "warm_turns_per_row": 6,
+      "fresh_input_tokens": 2005,
+      "first_three_rows": "One Basalt process, measured in order of increasing cached depth",
+      "remaining_rows": "Separate launches replaying the same six near-full request bodies",
+      "quality_checks": "Complete response, exact reasoning replay, correct marker and generated code oracle",
+      "window_timing": "Native DFlash Verify includes target execution and synchronization. Fixed-width medians omit the first 24 windows per measured request.",
+      "output_format": "A compact code format was applied uniformly after a 1024-token cutoff during the initial attempt."
+    },
+    "measurements": [
+      {
+        "arm": "depth-spec8",
+        "depth_k": 128,
+        "spec": 8,
+        "cached_tokens": 131080,
+        "input_tokens": 133085,
+        "decode_tps_median": 224.39999999999998,
+        "decode_tps_by_turn": [
+          215.2,
+          219.1,
+          225.7,
+          223.1,
+          244.7,
+          245.1
+        ],
+        "full_pi_turn_s_median": 4.414916560499478,
+        "median_verify_ms_by_width": {
+          "1": 10.771,
+          "2": 14.747,
+          "3": 16.164,
+          "4": 17.233,
+          "5": 18.8035,
+          "6": 20.509,
+          "7": 21.619,
+          "8": 22.802
+        },
+        "median_verify_ms_per_accepted_draft": 5.194506922211646,
+        "median_verify_ms_per_emitted_token": 4.101325123304562,
+        "median_emitted_tokens_per_window": 4.687728441857317,
+        "median_gpu_sm_mhz": 2925.0
+      },
+      {
+        "arm": "depth-spec8",
+        "depth_k": 192,
+        "spec": 8,
+        "cached_tokens": 196613,
+        "input_tokens": 198618,
+        "decode_tps_median": 241.8,
+        "decode_tps_by_turn": [
+          200.5,
+          222.1,
+          251.5,
+          257.0,
+          239.8,
+          243.8
+        ],
+        "full_pi_turn_s_median": 4.293284612499519,
+        "median_verify_ms_by_width": {
+          "1": 12.746,
+          "2": 14.372,
+          "3": 15.013,
+          "4": 16.134999999999998,
+          "5": 17.254,
+          "6": 19.5295,
+          "7": 20.9135,
+          "8": 21.9495
+        },
+        "median_verify_ms_per_accepted_draft": 4.726700408425359,
+        "median_verify_ms_per_emitted_token": 3.7811192696935234,
+        "median_emitted_tokens_per_window": 4.9682364965799195,
+        "median_gpu_sm_mhz": 2910.0
+      },
+      {
+        "arm": "depth-spec8",
+        "depth_k": 260,
+        "spec": 8,
+        "cached_tokens": 266239,
+        "input_tokens": 268244,
+        "decode_tps_median": 194.85000000000002,
+        "decode_tps_by_turn": [
+          200.3,
+          199.3,
+          189.8,
+          187.4,
+          190.4,
+          206.7
+        ],
+        "full_pi_turn_s_median": 5.509247422999579,
+        "median_verify_ms_by_width": {
+          "1": 15.8505,
+          "2": 17.887,
+          "3": 20.0025,
+          "4": 21.8,
+          "5": 23.1515,
+          "6": 25.829,
+          "7": 26.938,
+          "8": 27.6035
+        },
+        "median_verify_ms_per_accepted_draft": 5.925589381862585,
+        "median_verify_ms_per_emitted_token": 4.789794235951299,
+        "median_emitted_tokens_per_window": 5.154362416107382,
+        "median_gpu_sm_mhz": 2917.0
+      },
+      {
+        "arm": "spec4",
+        "depth_k": 260,
+        "spec": 4,
+        "cached_tokens": 266239,
+        "input_tokens": 268244,
+        "decode_tps_median": 192.4,
+        "decode_tps_by_turn": [
+          194.0,
+          191.4,
+          184.5,
+          193.4,
+          194.0,
+          190.6
+        ],
+        "full_pi_turn_s_median": 5.52536215750024,
+        "median_verify_ms_by_width": {
+          "1": 13.24,
+          "2": 14.6105,
+          "3": 15.59,
+          "4": 16.7395
+        },
+        "median_verify_ms_per_accepted_draft": 6.562813677064732,
+        "median_verify_ms_per_emitted_token": 4.7283587893411525,
+        "median_emitted_tokens_per_window": 3.5528726708074534,
+        "median_gpu_sm_mhz": 2902.0
+      },
+      {
+        "arm": "spec6",
+        "depth_k": 260,
+        "spec": 6,
+        "cached_tokens": 266239,
+        "input_tokens": 268244,
+        "decode_tps_median": 218.05,
+        "decode_tps_by_turn": [
+          220.2,
+          224.3,
+          213.7,
+          218.2,
+          204.8,
+          217.9
+        ],
+        "full_pi_turn_s_median": 4.982951085500645,
+        "median_verify_ms_by_width": {
+          "1": 12.917,
+          "2": 15.206,
+          "3": 15.744499999999999,
+          "4": 16.975,
+          "5": 18.104,
+          "6": 20.9795
+        },
+        "median_verify_ms_per_accepted_draft": 5.364843851108068,
+        "median_verify_ms_per_emitted_token": 4.21146504369538,
+        "median_emitted_tokens_per_window": 4.569507575757576,
+        "median_gpu_sm_mhz": 2902.0
+      },
+      {
+        "arm": "spec8-repeat",
+        "depth_k": 260,
+        "spec": 8,
+        "cached_tokens": 266239,
+        "input_tokens": 268244,
+        "decode_tps_median": 232.2,
+        "decode_tps_by_turn": [
+          234.8,
+          239.2,
+          219.7,
+          219.0,
+          229.6,
+          238.6
+        ],
+        "full_pi_turn_s_median": 4.820331840499421,
+        "median_verify_ms_by_width": {
+          "1": 13.901,
+          "2": 15.239,
+          "3": 15.527999999999999,
+          "4": 17.013,
+          "5": 18.127,
+          "6": 20.869,
+          "7": 22.189500000000002,
+          "8": 23.195
+        },
+        "median_verify_ms_per_accepted_draft": 4.954368561746988,
+        "median_verify_ms_per_emitted_token": 3.963454586320778,
+        "median_emitted_tokens_per_window": 4.9540431665311555,
+        "median_gpu_sm_mhz": 2902.0
+      }
+    ]
+  },
+  "power_limits": {
+    "settings": {
+      "vram_reserve_mib": 512,
+      "pool_workers": 10,
+      "spec": 8,
+      "cached_tokens": 265477,
+      "fresh_input_tokens": 1973,
+      "driver_limit_range_w": [
+        250.0,
+        380.0
+      ]
+    },
+    "method": "Five stages on one warmed Basalt process with six byte-matched Pi turns per stage. Effective limits and GPU telemetry were sampled during decode. Board power reports sensor readings.",
+    "measurements": [
+      {
+        "step": 0,
+        "limit_w": 360,
+        "decode_tps_median": 229.64999999999998,
+        "decode_tps_by_turn": [
+          232.1,
+          231.6,
+          232.6,
+          215.6,
+          227.7,
+          227.2
+        ],
+        "warm_wall_s_median": 5.020228860000316,
+        "board_power_instant_w_median": 270.97,
+        "board_power_avg_w_median": 248.95,
+        "sm_clock_mhz_median": 2910.0,
+        "software_cap_sample_fraction": 0.009009009009009009,
+        "width_8_verify_ms_median": 23.083
+      },
+      {
+        "step": 1,
+        "limit_w": 250,
+        "decode_tps_median": 225.9,
+        "decode_tps_by_turn": [
+          236.1,
+          227.4,
+          244.8,
+          224.4,
+          213.0,
+          215.5
+        ],
+        "warm_wall_s_median": 5.2492676770007165,
+        "board_power_instant_w_median": 251.73000000000002,
+        "board_power_avg_w_median": 246.12,
+        "sm_clock_mhz_median": 2865.0,
+        "software_cap_sample_fraction": 0.923728813559322,
+        "width_8_verify_ms_median": 22.957500000000003
+      },
+      {
+        "step": 2,
+        "limit_w": 360,
+        "decode_tps_median": 230.89999999999998,
+        "decode_tps_by_turn": [
+          228.7,
+          235.6,
+          233.1,
+          234.0,
+          222.3,
+          122.6
+        ],
+        "warm_wall_s_median": 5.039006685999993,
+        "board_power_instant_w_median": 256.68,
+        "board_power_avg_w_median": 240.42,
+        "sm_clock_mhz_median": 2917.0,
+        "software_cap_sample_fraction": 0.0,
+        "width_8_verify_ms_median": 22.438
+      },
+      {
+        "step": 3,
+        "limit_w": 380,
+        "decode_tps_median": 225.60000000000002,
+        "decode_tps_by_turn": [
+          204.0,
+          233.8,
+          225.9,
+          235.3,
+          225.3,
+          216.6
+        ],
+        "warm_wall_s_median": 5.201974509999673,
+        "board_power_instant_w_median": 258.38,
+        "board_power_avg_w_median": 242.11,
+        "sm_clock_mhz_median": 2910.0,
+        "software_cap_sample_fraction": 0.0,
+        "width_8_verify_ms_median": 23.161
+      },
+      {
+        "step": 4,
+        "limit_w": 360,
+        "decode_tps_median": 216.75,
+        "decode_tps_by_turn": [
+          187.0,
+          208.0,
+          209.5,
+          224.0,
+          234.5,
+          233.3
+        ],
+        "warm_wall_s_median": 5.4142078354998375,
+        "board_power_instant_w_median": 252.46,
+        "board_power_avg_w_median": 240.87,
+        "sm_clock_mhz_median": 2910.0,
+        "software_cap_sample_fraction": 0.0,
+        "width_8_verify_ms_median": 23.448500000000003
+      }
+    ]
+  },
+  "separate_slow_observation": {
+    "settings": {
+      "cached_tokens": 266239,
+      "spec": 8,
+      "limit_w": 360
+    },
+    "method": "Two invocations of an identical warm request outside the measured medians. Buffered tail loss left a partial trace for the slower invocation.",
+    "observations": [
+      {
+        "kind": "warmup",
+        "decode_tps": 196.0,
+        "width8_samples_excluding_first_24_per_section": 51,
+        "width8_verify_ms_median": 27.374,
+        "gpu_sm_mhz_median": 2925.0,
+        "gpu_sm_mhz_range": [
+          2910.0,
+          2932.0
+        ],
+        "gpu_power_instant_w_median": 230.7,
+        "pcie": [
+          [
+            5,
+            16
+          ]
+        ]
+      },
+      {
+        "kind": "flush-draft-trace",
+        "decode_tps": 153.3,
+        "width8_samples_excluding_first_24_per_section": 18,
+        "width8_verify_ms_median": 40.313,
+        "gpu_sm_mhz_median": 2925.0,
+        "gpu_sm_mhz_range": [
+          2910.0,
+          2932.0
+        ],
+        "gpu_power_instant_w_median": 196.3,
+        "pcie": [
+          [
+            5,
+            16
+          ]
+        ]
+      }
+    ]
+  }
+}

@@ -112,6 +112,25 @@ Qualification recovered all three synthetic markers at 131092 input tokens and p
 
 These results came from a separate local benchmark harness using the pinned source tree and reference GSQ pack. The public launcher now expresses the selected settings with the stable API alias `inkling-2-mini`. Publication validation uses CPU-only launcher checks. See [VALIDATION.md](VALIDATION.md) and [the sanitized measurement summary](benchmarks/gsq-270336.json) for provenance, exact values and method. The aggregate publishes reviewed measurements and method. Workload replay requires the private fixtures.
 
+### Context depth, speculative window and power limit
+
+Follow-up tests used the local Pi benchmark harness with the same 270336-token cap, GSQ pack and Basalt binary. The context and speculative-window sweep used a 360 W limit, 768 MiB of VRAM reserve and eight CPU workers. Each row summarizes six passing warm Pi turns with 2005 fresh input tokens. Fixed-width verify medians pool windows across those turns. The first three rows ran in sequence on one process. The last three used fresh launches and replayed the same near-full requests as the 266239-token row.
+
+| Cached tokens | Spec | Verify at maximum width | Verify per accepted draft | Decode | Full Pi turn |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 131080 | 8 | 22.80 ms | 5.19 ms | 224.40 tokens/s | 4.41 s |
+| 196613 | 8 | 21.95 ms | 4.73 ms | 241.80 tokens/s | 4.29 s |
+| 266239 | 8 | 27.60 ms | 5.93 ms | 194.85 tokens/s | 5.51 s |
+| 266239 | 4 | 16.74 ms | 6.56 ms | 192.40 tokens/s | 5.53 s |
+| 266239 | 6 | 20.98 ms | 5.36 ms | 218.05 tokens/s | 4.98 s |
+| 266239, repeat | 8 | 23.20 ms | 4.95 ms | 232.20 tokens/s | 4.82 s |
+
+At the same 266239-token cached depth, the two spec-8 runs differed by 37.35 tokens/s. The spec-6 result fell between them. This run-to-run variation limits what the ordered sweep can establish about context depth and the choice of speculative window.
+
+A separate power-limit sweep used a 512 MiB reserve, ten CPU workers, spec 8 and 265477 cached tokens. With one warmed process, the 250 W stage reached 225.90 tokens/s, the 380 W stage reached 225.60 tokens/s, and the three interleaved 360 W controls ranged from 216.75 to 230.90 tokens/s. The software power cap was active in about 92% of decode samples at 250 W. Median GPU core clocks were 2865 MHz at 250 W and about 2910 MHz at 360 W and 380 W. The card allowed limits from 250 W through 380 W.
+
+An additional near-full request replay at 360 W slowed from 196.0 to 153.3 tokens/s. Median sampled GPU core clock in both invocations was 2925 MHz and the link was PCIe Gen5 ×16. Median sampled board power fell from 230.7 to 196.3 W while width-8 verification rose from 27.37 to 40.31 ms in the recorded windows. Both invocations were outside the panel medians, and the slower native trace is partial. The source of the extra verification latency remains unresolved. [Follow-up measurements and method](benchmarks/gsq-context-spec-power.json)
+
 ### Historical measurements
 
 An earlier 270336-token benchmark used the same Basalt build and DFlash 2 with 265477 cached tokens and 1973 new tokens. Each number below is the median of six continuations from that separate historical run.
