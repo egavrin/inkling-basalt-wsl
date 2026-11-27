@@ -1,0 +1,111 @@
+{
+  "gsq": {
+    "filename": "Inkling-2-Mini-GSQ-RCO-IQ3_S-DFlash2.basalt",
+    "bytes": 13451914797,
+    "sha256": "1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6c680e",
+    "parts": [
+      {
+        "name": "gsq-dflash2.part00",
+        "bytes": 1879048192,
+        "sha256": "874b5a9b927dd3de5260bdbab6e49bb5fd7e0d26a59de0b11c904054d1c379d0"
+      },
+      {
+        "name": "gsq-dflash2.part01",
+        "bytes": 1879048192,
+        "sha256": "d58e036069ee092e41979e5bd6fe740c127fa809a786175c109c804eb5d82232"
+      },
+      {
+        "name": "gsq-dflash2.part02",
+        "bytes": 1879048192,
+        "sha256": "1639432556e774243aac965ae331a88f7b90ab942263da83f5adb9e803e388d1"
+      },
+      {
+        "name": "gsq-dflash2.part03",
+        "bytes": 1879048192,
+        "sha256": "a9fb25467285be5ac3caa8d79415e504af79dd8e356b336c9737e0dad125eb99"
+      },
+      {
+        "name": "gsq-dflash2.part04",
+        "bytes": 1879048192,
+        "sha256": "f8ab644f3a3a78968d1e37c1a4f73e07790518952b803f25264b3a2430d1df11"
+      },
+      {
+        "name": "gsq-dflash2.part05",
+        "bytes": 1879048192,
+        "sha256": "9bd31414694009476fc8c3fc699e82adf2a8e6609d0e55f8bf261020129f3e09"
+      },
+      {
+        "name": "gsq-dflash2.part06",
+        "bytes": 1879048192,
+        "sha256": "0170e46c2943a963cc0df23af072df3e5d76722e537d205d98d11ea520400e4f"
+      },
+      {
+        "name": "gsq-dflash2.part07",
+        "bytes": 298577453,
+        "sha256": "d2d8321cc31b37646dc50970ddda8f21b0e7cfc868cabc38ae19bdd3e76e1c5b"
+      }
+    ]
+  },
+  "mx8": {
+    "filename": "Inkling-2-Mini-DFlash2-MX8.basalt",
+    "bytes": 19591671136,
+    "sha256": "5c1f52101cd598c1578832f6c17c20a9c72a0a50ede0839b31d971369301907a",
+    "parts": [
+      {
+        "name": "mx8-dflash2.part00",
+        "bytes": 1879048192,
+        "sha256": "fb3267968c0152bd8b3c72befb527a9a5f970e8c07a8375cc389f630a250694b"
+      },
+      {
+        "name": "mx8-dflash2.part01",
+        "bytes": 1879048192,
+        "sha256": "2d584b039007ce7f5e6ea5383da7cc2c9a71785dd70484d7de1e69ef3571f68a"
+      },
+      {
+        "name": "mx8-dflash2.part02",
+        "bytes": 1879048192,
+        "sha256": "475bb5e3de84cb9087832e319293904a334e54516b29e9671d9b803850616faf"
+      },
+      {
+        "name": "mx8-dflash2.part03",
+        "bytes": 1879048192,
+        "sha256": "185f4f0baeb8da247b924a20bdab09b88e67954482a79601c7f72f65f8de4086"
+      },
+      {
+        "name": "mx8-dflash2.part04",
+        "bytes": 1879048192,
+        "sha256": "204fb6e28de7e0998b99ba850c1b8b74d05bea212f936d91e83d7ae1e59ea961"
+      },
+      {
+        "name": "mx8-dflash2.part05",
+        "bytes": 1879048192,
+        "sha256": "7a5999d414a1fd831b672a7b68bc77dd78903ff6eb13d6b5d9a4a38f840209e3"
+      },
+      {
+        "name": "mx8-dflash2.part06",
+        "bytes": 1879048192,
+        "sha256": "44fdc8b92efcee3b0c7c1e62d2497046740da6ade6c85466041ee1236538bf7d"
+      },
+      {
+        "name": "mx8-dflash2.part07",
+        "bytes": 1879048192,
+        "sha256": "88adb3ab9b5e80f20434a0957827b0dd2481316916a78892ff5843013ac28ef9"
+      },
+      {
+        "name": "mx8-dflash2.part08",
+        "bytes": 1879048192,
+        "sha256": "3643f6c73b124eb4023929938de2910bde328b93771c314ff2b788123d56286a"
+      },
+      {
+        "name": "mx8-dflash2.part09",
+        "bytes": 1879048192,
+        "sha256": "3e735519f313258e1a75918d4bba21f6d23698be137e1c5ab4f6dbbe9caa08da"
+      },
+      {
+        "name": "mx8-dflash2.part10",
+        "bytes": 801189216,
+        "sha256": "b3beeb9c97cb61f0ae41aab499d0ee50fe47506be620ab53a5bd2ad904834176"
+      }
+    ]
+  }
+}
