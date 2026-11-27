@@ -29,6 +29,19 @@ python3 scripts/serve.py --profile mx8 --context 131072 --dry-run
 
 Full runtime smoke is `bash scripts/smoke.sh <context>`. It saves revision, command, inputs, expected and observed results in the local state directory. Never publish local request/response logs without reviewing them.
 
+## WSL2 GPU acceptance on 2026-11-27
+
+Built the pinned source tree with CUDA 13.0.2 and GCC 13.3 on the RTX 5080 reference machine. The new binary SHA256 was `975bfc98aaacdf86aeb479c4ac298bdbb1d4b5541067f67c8db33e9757bff330`. The new virtual environment passed `pip check`.
+
+Assembled both packs using `bash scripts/prepare-packs.sh both` in a separate WSL state directory. The reconstruction reused local copies of the three large pinned input files and verified their SHA256 before conversion. Each derived pack passed the full section, tensor, geometry and tokenizer checks.
+
+| Reconstructed pack | Bytes | SHA256 |
+| --- | ---: | --- |
+| GSQ IQ3_S + DFlash 2 | 13451914629 | `4bd14a49d986de6624857590e3c16462f7a73d2b4c44ba79d4f0c335bc49cd93` |
+| MX8 + DFlash 2 | 19598669487 | `c356ff04a8bd42caa927b197fc90f6a2cb77c3a4fa111d15fd772519e1bab4c5` |
+
+Launched both from a clean GitHub checkout at `3ddaea7ff86743e2807f09533aadd1bd7616f8f5` using the rebuilt Basalt and reconstructed packs, one profile at a time. Both passed the sandbox visibility check, reported loaded at 270336 tokens, returned 391 from the documented smoke request, completed a synthetic tool call and replayed `reasoning_content` on continuation. The larger-context experiment and six-turn Pi measurements are described in the README.
+
 ## Explicit context tuning: focused repair check
 
 CPU-only dry-run checks on 2026-11-27 passed after adding `--expert-cache` and `--vram-reserve-mib`:

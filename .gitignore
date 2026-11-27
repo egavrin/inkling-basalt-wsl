@@ -1,3 +1,6 @@
 /.state/
 __pycache__/
 *.pyc
+*.basalt
+*.gguf
+*.safetensors
