@@ -16,17 +16,20 @@ REFERENCE = {'gsq': '1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6
              'mx8': '5c1f52101cd598c1578832f6c17c20a9c72a0a50ede0839b31d971369301907a'}
 
 
-def command(profile, context=None, expert_cache=None, vram_reserve_mib=None):
-    context = context if context is not None else (393216 if profile == 'gsq' else 270336)
+def command(profile, context=None, expert_cache=None, vram_reserve_mib=None, pool_workers=None):
+    context = context if context is not None else 270336
+    selected = profile == 'gsq' and context == 270336
     tuned = profile == 'gsq' and context == 393216
     if expert_cache is None and tuned:
         expert_cache = 450
     if vram_reserve_mib is None:
-        vram_reserve_mib = 768 if tuned else 512
+        vram_reserve_mib = 768 if selected or tuned else 512
+    if pool_workers is None:
+        pool_workers = 8 if selected else 10
     args = ['/basalt/bin/basalt', 'serve', '/model/' + NAMES[profile],
             '--alias', 'inkling-2-mini', '--host', '127.0.0.1', '--port', '8191',
             '--parallel', '1', '--max-context', str(context), '--kv', 'fp8', '--spec', '8',
-            '--suffix-draft', '0', '--vision', 'off', '--pool-workers', '10',
+            '--suffix-draft', '0', '--vision', 'off', '--pool-workers', str(pool_workers),
             '--vram-reserve-mib', str(vram_reserve_mib), '--ram-reserve-mib', '4096', '--fit-max-tokens', '--request-lines']
     if expert_cache is not None:
         args += ['--expert-cache', str(expert_cache)]
@@ -49,11 +52,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--profile', choices=NAMES, default='gsq')
     ap.add_argument('--context', type=int,
-                    help='total context cap (GSQ: 393216; MX8: 270336); GSQ fallback: 270336')
+                    help='total context cap (default: 270336); GSQ larger window: 393216')
     ap.add_argument('--expert-cache', type=int,
                     help='expert-cache count (1-3072); default: 450 for GSQ at 393216, automatic otherwise')
     ap.add_argument('--vram-reserve-mib', type=int, choices=(512, 768, 1024),
-                    help='VRAM reserve in MiB (GSQ at 393216: 768; otherwise: 512)')
+                    help='VRAM reserve in MiB (GSQ at 270336 or 393216: 768; otherwise: 512)')
+    ap.add_argument('--pool-workers', type=int,
+                    help='CPU worker count from 1 to 2147483647 (GSQ at 270336 defaults to 8, otherwise 10)')
     ap.add_argument('--dry-run', action='store_true', help='print contract without loading files or GPU')
     ap.add_argument('--check-sandbox', action='store_true', help='check namespace visibility without loading the model')
     a = ap.parse_args()
@@ -61,9 +66,11 @@ def main():
         ap.error('context must be between 1024 and the model limit 1048576')
     if a.expert_cache is not None and not 1 <= a.expert_cache <= 3072:
         ap.error('expert-cache must be between 1 and 3072')
+    if a.pool_workers is not None and not 1 <= a.pool_workers <= 2147483647:
+        ap.error('pool-workers must be between 1 and 2147483647')
     cuda = Path(os.environ.get('CUDA_HOME', '/usr/local/cuda-13.0')).resolve()
     mounts = sandbox(cuda)
-    cmd = command(a.profile, a.context, a.expert_cache, a.vram_reserve_mib)
+    cmd = command(a.profile, a.context, a.expert_cache, a.vram_reserve_mib, a.pool_workers)
     if a.check_sandbox:
         subprocess.run(mounts + ['/usr/bin/python3', '-c',
             "import os,socket; assert not os.path.exists('/home'); assert not os.path.exists('/mnt/c'); "

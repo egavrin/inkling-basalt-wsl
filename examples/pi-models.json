@@ -10,7 +10,7 @@
           "name": "Inkling 2 Mini on Basalt",
           "reasoning": false,
           "input": ["text"],
-          "contextWindow": 393216,
+          "contextWindow": 270336,
           "maxTokens": 32768,
           "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
           "compat": {

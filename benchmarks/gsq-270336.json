@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-27",
+  "hardware": {
+    "gpu": "RTX 5080",
+    "gpu_gib": 16,
+    "system_ram_gib": 32,
+    "environment": "Ubuntu under WSL2"
+  },
+  "provenance": {
+    "basalt_tree": "0026804d2191e2c55ff7cb4d9eddfa122f4ac511",
+    "binary_sha256": "c9240671880aed9f5c8074278285169e578b7c83a7fb93ca6a46f3f4158486cc",
+    "model": "Inkling-2-Mini-GSQ-RCO-IQ3_S-DFlash2.basalt",
+    "model_bytes": 13451914797,
+    "model_sha256": "1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6c680e",
+    "runtime": "Separate local benchmark harness. Publication validation uses CPU-only launcher checks."
+  },
+  "method": {
+    "cached_tokens": 265477,
+    "fresh_tokens": 1973,
+    "input_tokens": 267450,
+    "selected_window": 270336,
+    "window_occupancy_percent": 98.93,
+    "measured_warm_turns_per_arm": 6,
+    "excluded": "Cold request and one warmup excluded from medians",
+    "matching": "Same request panels, cached token counts, native binary and model pack",
+    "memory": "Minimum periodic Windows available-system-RAM samples inside cold, warmup and measured request intervals. Continuous minima may be lower.",
+    "memory_floor_mib": 8192,
+    "privacy": "Aggregate publication excludes prompts, responses, private paths and raw logs. Workload replay requires the private fixtures."
+  },
+  "selected_arms": [
+    "workers8",
+    "workers-control-3"
+  ],
+  "measurements": [
+    {
+      "arm": "a1",
+      "context": 393216,
+      "expert_cache": 450,
+      "vram_reserve_mib": 768,
+      "pool_workers": 10,
+      "decode_tps": 67.30000000000001,
+      "warm_wall_s": 15.008692805999999,
+      "cold_prompt_read_s": 80.237,
+      "windows_min_available_mib": 4680
+    },
+    {
+      "arm": "b1",
+      "context": 270336,
+      "expert_cache": "auto",
+      "vram_reserve_mib": 512,
+      "pool_workers": 10,
+      "decode_tps": 143.75,
+      "warm_wall_s": 7.3088978129999305,
+      "cold_prompt_read_s": 82.47,
+      "windows_min_available_mib": 7958
+    },
+    {
+      "arm": "a2",
+      "context": 393216,
+      "expert_cache": 450,
+      "vram_reserve_mib": 768,
+      "pool_workers": 10,
+      "decode_tps": 67.80000000000001,
+      "warm_wall_s": 14.615571040000304,
+      "cold_prompt_read_s": 81.246,
+      "windows_min_available_mib": 3994
+    },
+    {
+      "arm": "workers8",
+      "context": 270336,
+      "expert_cache": "auto",
+      "vram_reserve_mib": 768,
+      "pool_workers": 8,
+      "decode_tps": 228.14999999999998,
+      "warm_wall_s": 5.155970683500527,
+      "cold_prompt_read_s": 79.914,
+      "windows_min_available_mib": 8466
+    },
+    {
+      "arm": "workers12",
+      "context": 270336,
+      "expert_cache": "auto",
+      "vram_reserve_mib": 768,
+      "pool_workers": 12,
+      "decode_tps": 193.2,
+      "warm_wall_s": 5.886890773000232,
+      "cold_prompt_read_s": 78.594,
+      "windows_min_available_mib": 8327
+    },
+    {
+      "arm": "workers-control-3",
+      "context": 270336,
+      "expert_cache": "auto",
+      "vram_reserve_mib": 768,
+      "pool_workers": 8,
+      "decode_tps": 229.25,
+      "warm_wall_s": 5.11516975800032,
+      "cold_prompt_read_s": 79.445,
+      "windows_min_available_mib": 8740
+    },
+    {
+      "arm": "c2",
+      "context": 270336,
+      "expert_cache": "auto",
+      "vram_reserve_mib": 768,
+      "pool_workers": 10,
+      "decode_tps": 220.5,
+      "warm_wall_s": 5.30533951749976,
+      "cold_prompt_read_s": 80.224,
+      "windows_min_available_mib": 8107
+    },
+    {
+      "arm": "workers-control-2",
+      "context": 270336,
+      "expert_cache": "auto",
+      "vram_reserve_mib": 768,
+      "pool_workers": 10,
+      "decode_tps": 229.35,
+      "warm_wall_s": 5.133989995999855,
+      "cold_prompt_read_s": 79.839,
+      "windows_min_available_mib": 8543
+    }
+  ],
+  "qualification": [
+    {
+      "case": "q-131-qualification",
+      "pass": true,
+      "input_tokens": 131092,
+      "cold_wall_s": 29.56697181600066,
+      "tool_pass": true,
+      "windows_min_available_mib": 9031
+    },
+    {
+      "case": "q-262-settled-qualification",
+      "pass": true,
+      "input_tokens": 262184,
+      "cold_wall_s": 79.33849456699954,
+      "warm_cached_tokens": 262221,
+      "warm_wall_s": 0.3479525319999084,
+      "requested_output_cap": 32768,
+      "context_tokens_left": 8084,
+      "windows_min_available_mib": 9434
+    },
+    {
+      "case": "q-262-qualification",
+      "pass": false,
+      "input_tokens": 262184,
+      "cold_wall_s": 79.28523893999954,
+      "warm_cached_tokens": 262221,
+      "warm_wall_s": 0.3514282619998994,
+      "requested_output_cap": 32768,
+      "context_tokens_left": 8084,
+      "windows_min_available_mib": 6915
+    }
+  ],
+  "qualification_note": "All three marker answers correct in all cases. Rapid-restart q-262 failed the memory floor. Settled q-262 passed."
+}

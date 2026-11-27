@@ -1,5 +1,19 @@
 # Implementation checks
 
+## Selected GSQ profile publication (2026-11-27)
+
+The current default is GSQ at 270336 total tokens, automatic experts, a 768 MiB VRAM reserve and 8 CPU workers. The explicit 393216 configuration uses 450 experts, 768 MiB and 10 workers. MX8 and other-context defaults use automatic experts, 512 MiB and 10 workers. `--pool-workers` can override the count. The API model alias is `inkling-2-mini` and the Pi example sets `contextWindow` to 270336.
+
+The [sanitized benchmark aggregate](benchmarks/gsq-270336.json) records independently collected local results using Basalt tree `0026804d2191e2c55ff7cb4d9eddfa122f4ac511`, matching this recipe's pinned tree, and the reference GSQ pack. No source, dependency or weights pin changed. The benchmark used a local harness and a different local API alias. Publication checks validate the public launcher on the CPU.
+
+The matched input was 265477 cached plus 1973 fresh tokens, giving 267450 total, or 98.93% of 270336. Each selected repeat measured six warm Pi turns after an excluded warmup. Median decode was 228.15 and 229.25 tokens/s. Median full turn time was 5.15597 and 5.11517 s. Minimum sampled Windows available system RAM was 8466 and 8740 MiB. The matched 384K controls measured 67.30 and 67.80 tokens/s, 15.00869 and 14.61557 s, and 4680 and 3994 MiB. These are sampled host RAM minima during request intervals. Continuous minima may be lower between samples. Historical results below and in the README are separate runs.
+
+The selected profile passed a 131092-token marker/tool qualification and a settled 262184-token marker/continuation qualification. The latter reused 262221 cached tokens and handled a requested 32768-token output cap with 8084 tokens left through token fitting. The settled minimum Windows available RAM was 9434 MiB. A rapid-restart attempt returned correct markers and continuation but failed the 8192 MiB memory criterion at 6915 MiB. Memory qualification therefore depends on host state, including restart settling.
+
+Publication validation was CPU-only. WSL dry-run assertions passed for GSQ default (270336/auto/768/8), GSQ 393216 (393216/450/768/10), MX8 default (270336/auto/512/10), GSQ 131072 (131072/auto/512/10), and explicit expert/reserve/worker overrides. Worker counts 17 and 2147483647 passed through unchanged. Counts 0, -1, 2147483648 and non-integer `x` returned argument error status 2. The API alias remained `inkling-2-mini` in all checked commands, and `git diff --check` passed. Use `python3 scripts/serve.py --profile gsq --dry-run` to inspect the selected command, and add `--context 393216` for the retained larger-window defaults. These commands inspect arguments on the CPU. The aggregate contains method, binary/model identity and reviewed measurements. Workload replay requires the private fixtures.
+
+## Historical implementation checks
+
 CPU-only implementation validation on 2026-11-27 passed:
 
 - Parsed every Python script with `ast.parse` and every shell script with `bash -n`.
