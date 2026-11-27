@@ -1,0 +1,75 @@
+{
+  "upstream_metadata": [
+    {
+      "revision": "3e3884f326a07e2df6d01122508c507cdf6f6dd1",
+      "repo": "ISTA-DASLab/Inkling-2-Mini-GSQ-RCO-GGUF",
+      "base_model": "thinkingmachines/Inkling-2-Mini",
+      "license": "apache-2.0"
+    },
+    {
+      "revision": "c2afac3adb772e14d77b2ea2ac7068ad4460e932",
+      "repo": "jesdga/Inkling-2-Mini-Basalt",
+      "base_model": "thinkingmachines/Inkling-2-Mini",
+      "license": "apache-2.0"
+    },
+    {
+      "revision": "4f9088ea66c21f2b99ed657d1941c306b03e84d2",
+      "repo": "incoai/Inkling-2-Mini-DFlash2",
+      "base_model": [
+        "thinkingmachines/Inkling-2-Mini"
+      ],
+      "license": "apache-2.0"
+    }
+  ],
+  "files": [
+    {
+      "bytes": 11425259648,
+      "url": "https://huggingface.co/ISTA-DASLab/Inkling-2-Mini-GSQ-RCO-GGUF/resolve/3e3884f326a07e2df6d01122508c507cdf6f6dd1/Inkling-2-Mini-GSQ-RCO-IQ3_S.gguf",
+      "local": "gsq/Inkling-2-Mini-GSQ-RCO-IQ3_S.gguf",
+      "sha256": "8a3515374c3cd9b65a1677b17e805bb1e32df8e98756e5f0d2fe1837d62aa4cb"
+    },
+    {
+      "bytes": 13139,
+      "url": "https://huggingface.co/ISTA-DASLab/Inkling-2-Mini-GSQ-RCO-GGUF/resolve/3e3884f326a07e2df6d01122508c507cdf6f6dd1/README.md",
+      "local": "gsq/README.md",
+      "sha256": "e38f4e62263acbf2fdd575bf943c8d2b2d3ef9af8b413716fee7f4fe2df1a41c"
+    },
+    {
+      "bytes": 19606374189,
+      "url": "https://huggingface.co/jesdga/Inkling-2-Mini-Basalt/resolve/c2afac3adb772e14d77b2ea2ac7068ad4460e932/Inkling-2-Mini-NVFP4-MX8.basalt",
+      "local": "mx8/Inkling-2-Mini-NVFP4-MX8.basalt",
+      "sha256": "28ec70723feaa037942a02f55b9d5e898276f3e62a3b1fa083745f932a041b99"
+    },
+    {
+      "bytes": 4577,
+      "url": "https://huggingface.co/jesdga/Inkling-2-Mini-Basalt/resolve/c2afac3adb772e14d77b2ea2ac7068ad4460e932/README.md",
+      "local": "mx8/README.md",
+      "sha256": "b045d015038cea59c9634f99f267b3dcd64ab3f953b2f866ebbefff5b23517da"
+    },
+    {
+      "bytes": 11358,
+      "url": "https://huggingface.co/jesdga/Inkling-2-Mini-Basalt/resolve/c2afac3adb772e14d77b2ea2ac7068ad4460e932/LICENSE",
+      "local": "mx8/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "bytes": 989975616,
+      "url": "https://huggingface.co/incoai/Inkling-2-Mini-DFlash2/resolve/4f9088ea66c21f2b99ed657d1941c306b03e84d2/model.safetensors",
+      "local": "dflash2/model.safetensors",
+      "sha256": "217980ab00d116693fa5946df7bbfd967caf5fac1f529afd541fbd470ddb54ee"
+    },
+    {
+      "bytes": 1311,
+      "url": "https://huggingface.co/incoai/Inkling-2-Mini-DFlash2/resolve/4f9088ea66c21f2b99ed657d1941c306b03e84d2/config.json",
+      "local": "dflash2/config.json",
+      "sha256": "d094e435eb939e01fca6297f637c5af35e3da4b552f8e1ab0a181cd278a1cefa"
+    },
+    {
+      "bytes": 4660,
+      "url": "https://huggingface.co/incoai/Inkling-2-Mini-DFlash2/resolve/4f9088ea66c21f2b99ed657d1941c306b03e84d2/README.md",
+      "local": "dflash2/README.md",
+      "sha256": "e809da60c54b754707657585ef479981925cfc9a14d3d4fe5223189b354a8a91"
+    }
+  ],
+  "verified_date": "2026-11-27"
+}

@@ -11,9 +11,8 @@ https://huggingface.co/jesdga/Inkling-2-Mini-Basalt
 DFlash 2 speculative drafter by Inco AI — Apache License 2.0
 https://huggingface.co/incoai/Inkling-2-Mini-DFlash2
 
-The GSQ release pack converts supported GGUF tensors to the Basalt layout,
+The GSQ recipe converts supported GGUF tensors to the Basalt layout,
 preserves the mixed-precision expert weights and embeds DFlash 2.
-The MX8 release pack retains the original NVFP4/MXFP8 target weights and
-embeds the same DFlash 2 drafter. The part files are consecutive byte ranges
-of these two packs. The release manifest identifies each part and assembled
-pack by size and SHA-256. See MODEL-LICENSE.txt for the governing license.
+The MX8 recipe retains the original NVFP4/MXFP8 target weights and embeds
+the same DFlash 2 drafter. The input manifest pins sources by revision and
+SHA-256. See MODEL-LICENSE.txt for the governing license.

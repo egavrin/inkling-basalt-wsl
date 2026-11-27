@@ -1,0 +1,25 @@
+{
+  "providers": {
+    "inkling": {
+      "baseUrl": "http://127.0.0.1:8191/v1",
+      "api": "openai-completions",
+      "apiKey": "local",
+      "models": [
+        {
+          "id": "inkling-2-mini",
+          "name": "Inkling 2 Mini on Basalt",
+          "reasoning": false,
+          "input": ["text"],
+          "contextWindow": 270336,
+          "maxTokens": 32768,
+          "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+          "compat": {
+            "supportsDeveloperRole": false,
+            "supportsStore": false,
+            "maxTokensField": "max_tokens"
+          }
+        }
+      ]
+    }
+  }
+}
