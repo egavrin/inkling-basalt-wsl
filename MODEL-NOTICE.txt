@@ -16,3 +16,10 @@ preserves the mixed-precision expert weights and embeds DFlash 2.
 The MX8 recipe retains the original NVFP4/MXFP8 target weights and embeds
 the same DFlash 2 drafter. The input manifest pins sources by revision and
 SHA-256. See MODEL-LICENSE.txt for the governing license.
+
+Pi-preview LoRA by Harness Hub — Apache License 2.0 model-card metadata
+https://huggingface.co/harness-hub/Inkling-2-Mini-pi-adapted-preview
+Pinned revision: 7788a5325f3223440e2812a02ecc7759f77f344a
+The default Pi pack merges this adapter into the verified quantized GSQ
+attention weights in FP32 and requantizes to Q8_0. It is an experimental
+community merge, not an official pristine BF16 adapted release.

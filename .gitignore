@@ -4,3 +4,9 @@ __pycache__/
 *.basalt
 *.gguf
 *.safetensors
+
+.env
+.env.*
+!.env.example
+node_modules/
+*.partial

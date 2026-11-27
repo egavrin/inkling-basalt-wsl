@@ -23,9 +23,11 @@ def digest(path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('profile', nargs='?', choices=['gsq', 'mx8', 'both'], default='both')
+    ap.add_argument('profile', nargs='?', choices=['pi', 'gsq', 'mx8', 'both'], default='both')
     a = ap.parse_args()
     for item in json.loads((ROOT / 'manifests/inputs.json').read_text())['files']:
+        if item['local'].startswith('pi/') and a.profile != 'pi':
+            continue
         if a.profile == 'mx8' and item['local'].startswith('gsq/'):
             continue
         out = STATE / 'inputs' / item['local']

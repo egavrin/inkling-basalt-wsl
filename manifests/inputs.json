@@ -69,6 +69,12 @@
       "url": "https://huggingface.co/incoai/Inkling-2-Mini-DFlash2/resolve/4f9088ea66c21f2b99ed657d1941c306b03e84d2/README.md",
       "local": "dflash2/README.md",
       "sha256": "e809da60c54b754707657585ef479981925cfc9a14d3d4fe5223189b354a8a91"
+    },
+    {
+      "local": "pi/adapter_model.safetensors",
+      "url": "https://huggingface.co/harness-hub/Inkling-2-Mini-pi-adapted-preview/resolve/7788a5325f3223440e2812a02ecc7759f77f344a/adapter_model.safetensors",
+      "bytes": 53507400,
+      "sha256": "772f1b9a4585448106929b5c3a8540ef1a523d85c2a4694f37d8d5380bb3c903"
     }
   ],
   "verified_date": "2026-11-27"

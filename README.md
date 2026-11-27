@@ -1,6 +1,6 @@
 # Inkling 2 Mini + Basalt on WSL2
 
-Reproduce and run **GSQ-RCO IQ3_S + IncoAI DFlash 2** or **MX8 + the same DFlash 2 checkpoint** in a private WSL2 GPU sandbox. The source, model inputs, conversion settings, tensor hashes and default launch arguments are pinned. Everything lives in this checkout or the explicit `INKLING_STATE` directory; no pre-existing personal project is required.
+Reproduce and run **GSQ-RCO IQ3_S + IncoAI DFlash 2 + Pi-preview LoRA** (the default), or roll back to stock **GSQ** or **MX8 + the same DFlash 2 checkpoint** in a private WSL2 GPU sandbox. The source, model inputs, conversion settings, tensor hashes and default launch arguments are pinned. Everything lives in this checkout or the explicit `INKLING_STATE` directory; no pre-existing personal project is required.
 
 This is a community setup, not an official release from Thinking Machines, ISTA-DASLab, IncoAI or Basalt. Models retain their upstream licenses. See [MODEL-NOTICE.txt](MODEL-NOTICE.txt) and [MODEL-LICENSE.txt](MODEL-LICENSE.txt).
 
@@ -9,13 +9,13 @@ This is a community setup, not an official release from Thinking Machines, ISTA-
 - Windows with WSL2, Ubuntu 24.04 x86-64, and an NVIDIA Windows driver supporting CUDA 13.0. `/dev/dxg` and `/usr/lib/wsl/lib` must be available. Install the GPU driver on Windows; do not install a Linux display driver in WSL.
 - CUDA Toolkit **13.0** (the reference build used **13.0.2**), GCC/G++ **13**, Python **3.12**, CMake, Ninja, Git, curl, bubblewrap, and Python venv support.
 - Working unprivileged user namespaces for bubblewrap. The launcher fails closed if the sandbox cannot start. It does not fall back to an unrestricted process.
-- Sufficient system RAM, GPU memory and SSD space. Plan for at least **100 GB free** for both upstream reconstructions, intermediates, source and build. Full SHA verification reads tens of GB. Avoid concurrent conversion, hashing and GPU benchmarks. Both profiles default to 270336 total tokens (264K). GSQ also offers an opt-in 393216-token (384K) configuration. Available context depends on the GPU and host memory.
+- Sufficient system RAM, GPU memory and SSD space. Plan for at least **100 GB free** for model inputs, intermediates, source and build. Full SHA verification reads tens of GB. Avoid concurrent conversion, hashing and GPU benchmarks. All profiles default to 270336 total tokens (264K). Stock GSQ also has a tested 393216-token (384K) configuration. Available context depends on the GPU and host memory.
 
 Ubuntu system packages (CUDA is a separate prerequisite):
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y git curl cmake ninja-build g++-13 python3 python3-venv bubblewrap
+sudo apt-get install -y git curl cmake ninja-build g++-13 python3 python3-venv bubblewrap ripgrep fd-find
 ```
 
 Obtain CUDA 13.0.2 from the [NVIDIA CUDA Toolkit archive](https://developer.nvidia.com/cuda-toolkit-archive), selecting WSL-Ubuntu. Set `CUDA_HOME` to its installation root. The build checks for the 13.0 compiler family and GCC 13. It does not change WSL resource limits, restart WSL or modify other services.
@@ -36,7 +36,7 @@ bash scripts/prepare-packs.sh
 
 Keep these two environment variables set in each terminal. Without `INKLING_STATE`, scripts use `.state/` under this checkout. Without `CUDA_HOME`, they use `/usr/local/cuda-13.0`. No files in either location should be committed.
 
-`bash scripts/prepare-packs.sh gsq|mx8|both` selects outputs (default `both`). MX8-only skips the 11.4 GB GSQ input and intermediate; GSQ still needs the official MX8 input for shared sections. `pack.py verify gsq|mx8|both` similarly scopes verification. Input downloads can be run separately with `python3 scripts/download.py gsq|mx8|both`.
+`bash scripts/prepare-packs.sh gsq|mx8|both` selects the original stock outputs. The default `pi` builds stock GSQ and applies the pinned Pi adapter. MX8-only skips the 11.4 GB GSQ input and intermediate. GSQ still needs the official MX8 input for shared sections. `pack.py verify gsq|mx8|both` similarly scopes verification. Input downloads can be run separately with `python3 scripts/download.py pi|gsq|mx8|both`.
 
 `build.sh` creates a clean Basalt checkout, applies the four pinned cherry-picks, checks the exact Git tree, and builds with two jobs (`BUILD_JOBS` overrides this). It installs pinned Python conversion/runtime dependencies in a private venv and writes `binary.sha256`. It never expects different machines to produce byte-identical native binaries.
 
@@ -50,13 +50,62 @@ To repeat full verification later:
 "$INKLING_STATE/venv/bin/python" scripts/pack.py verify
 ```
 
-The two installable profiles are assembled from public Hugging Face inputs. The resulting `.basalt` files live under `$INKLING_STATE/models/` and can be reused on another compatible installation after `pack.py verify gsq|mx8|both`.
+The stock profiles are assembled from public Hugging Face inputs. The resulting `.basalt` files live under `$INKLING_STATE/models/` and can be reused on another compatible installation after `pack.py verify gsq|mx8|both`.
+
+## Pi-preview merge and interactive Pi with Exa
+
+The default `prepare-packs.sh` builds `Inkling-2-Mini-GSQ-RCO-IQ3_S-DFlash2-Pi-7788a53.basalt` and records its actual hash in `pack-verification.json`. The adapter is [harness-hub/Inkling-2-Mini-pi-adapted-preview](https://huggingface.co/harness-hub/Inkling-2-Mini-pi-adapted-preview/tree/7788a5325f3223440e2812a02ecc7759f77f344a), revision `7788a5325f3223440e2812a02ecc7759f77f344a`, root `adapter_model.safetensors` (53,507,400 bytes, SHA256 `772f1b9a4585448106929b5c3a8540ef1a523d85c2a4694f37d8d5380bb3c903`). Its published config is preserved in `manifests/pi-adapter-config.json`.
+
+This is an experimental **quantized-base delta merge**: dequantize the verified stock Q8_0 attention tensors to FP32, add `2 * (B @ A)` in FP32, then use the pinned converter's Q8_0 quantizer without intermediate BF16 rounding. The published q/k/v/o mapping requires no transpose or permutation. All 96 targets must pass a zero-delta roundtrip and match the accepted merged tensor hashes in `manifests/pi-equivalence.json`. All 641 other tensors, including 81 DFlash tensors, and all metadata and other sections remain unchanged. Stock equivalence verification runs first; a valid reconstructed baseline does **not** need the original whole-file hash. Packaging metadata/offsets may change whole-file hashes. Partial outputs are verified before atomic promotion; existing outputs are verified, never silently overwritten. The merge keeps temporary target tensors in `$INKLING_STATE/pi-merge/` and needs roughly another 14 GB for the adapted pack. Stop inference during conversion and full verification to avoid host memory pressure.
+
+```bash
+# Repeat full adapted-pack verification (uses the pinned Basalt venv):
+"$INKLING_STATE/venv/bin/python" scripts/pi-pack.py verify
+# Start the default adapted model, in its own terminal:
+python3 scripts/serve.py
+```
+
+Install Node.js and npm on the WSL host first (reference runtime: Node **26.10.0**, npm **11.19.1**; Node 22+ required). `install-pi.sh` copies the host Node/rg/fd executables into private state and installs exact direct package versions: `@earendil-works/pi-coding-agent@1.6.0`, `@aliou/pi-guardrails@0.24.0`, `pi-token-stats@0.1.1`. npm writes its resolved dependency lock in private state. System `bwrap`, `rg`, and `fd`/`fdfind` are required; install the Ubuntu packages above. No private local runtime is required.
+
+```bash
+bash scripts/install-pi.sh
+# Set the same INKLING_STATE as the model terminal.
+mkdir -p "$HOME/inkling-workspace"
+# Create the host-only credential file securely without putting the key in shell history:
+umask 077
+read -rsp 'Exa API key: ' exa_key; printf '\n'
+printf 'EXA_API_KEY=%s\n' "$exa_key" > "$INKLING_STATE/.env"
+unset exa_key
+chmod 600 "$INKLING_STATE/.env"
+python3 scripts/pi-workspace.py "$HOME/inkling-workspace"
+# No Exa account/key needed for this mode; no credential is read:
+python3 scripts/pi-workspace.py "$HOME/inkling-workspace" --no-search
+```
+
+The normal entrypoint is an interactive Pi session. `--prompt '...'` supplies an initial prompt; `--print --prompt '...'` or `--json --prompt '...'` runs one turn; `--continue` resumes the workspace session. `--endpoint-socket PATH` can select another private inference socket. By default the launcher uses `$INKLING_STATE/run/inference.sock`, checks health and the stable `inkling-2-mini` alias, and obtains the served context cap. A CPU-only startup/isolation check is available with `--check --no-search`; it requires installed Pi dependencies but does not need a model server. `--check` with search enabled additionally requires the credential and starts the broker without issuing search.
+
+Pi enables native Code Mode, tool discovery, workspace file tools, and `web_search`. Ask for a web search or call `tools.web_search({query:"...", numResults:3})` within Code Mode. The model and Pi each have a private network namespace with no general outbound access. Pi can reach only the mounted inference socket and the search broker socket. The **host-only broker** reads `$INKLING_STATE/.env`, sends HTTPS solely to `https://api.exa.ai/search`, bounds requests/results, strips provider errors/headers, and returns titles, URLs and highlights. It never passes the credential into Pi's environment, mounts or logs. `--no-search` omits both the broker and search extension. Exa requests send the requested search text to Exa and may incur usage charges.
+
+Only the chosen workspace is exposed for editing. Keep it separate from `INKLING_STATE`: overlapping directories are rejected to protect credentials, runtime and sessions. Shell tools are disabled; file-tool scope checks also apply to nested Code Mode calls. Pi state and sessions persist privately under `$INKLING_STATE/pi-workspaces/`. Generated content, including web results and user prompts, can be retained in these local sessions; do not publish them. Do not put secrets inside the editable workspace. `.env` files are ignored by Git as an additional safeguard. Exa is optional; a missing or insecure key fails closed with instructions to use `--no-search`.
+
+Rollback preserves the same socket and model alias, so Pi does not need reconfiguration:
+
+```bash
+# Stop the foreground model with Ctrl-C before switching.
+bash scripts/prepare-packs.sh gsq
+python3 scripts/serve.py --profile gsq
+# Or stop it again and select the prior MX8 profile:
+bash scripts/prepare-packs.sh mx8
+python3 scripts/serve.py --profile mx8
+```
+
+`prepare-packs.sh both` and `pack.py verify gsq|mx8|both` retain their stock-only meaning. To return to the adapted default, stop the server and run `python3 scripts/serve.py`.
 
 ## Run one profile
 
 ```bash
 python3 scripts/serve.py --check-sandbox
-python3 scripts/serve.py --profile gsq
+python3 scripts/serve.py # default: pi
 # Or, after stopping the first server with Ctrl-C:
 python3 scripts/serve.py --profile mx8
 ```
@@ -67,29 +116,32 @@ The profiles use these defaults:
 
 | Setting | Value |
 | --- | --- |
-| Context cap | 270336 total tokens for both profiles |
-| Expert cache | 450 for GSQ at 393216, automatic otherwise |
+| Context cap | 270336 total tokens for all profiles |
+| Expert cache | 450 for Pi/GSQ at 393216, automatic otherwise |
 | KV cache | FP8 |
 | DFlash speculative window | 8 |
 | Suffix/prompt-lookup draft | 0 |
 | Parallel slots | 1 |
 | Vision | off |
-| CPU workers | 8 for GSQ at 270336, 10 otherwise |
-| VRAM reserve | 768 MiB for GSQ at 270336 or 393216, 512 MiB otherwise |
+| CPU workers | 8 for Pi/GSQ at 270336, 10 otherwise |
+| VRAM reserve | 768 MiB for Pi/GSQ at 270336 or 393216, 512 MiB otherwise |
 | RAM reserve | 4096 MiB |
 | Token fitting | `--fit-max-tokens` |
-| API model alias | `inkling-2-mini` for both profiles |
+| API model alias | `inkling-2-mini` for all profiles |
 
 Inspect the complete launch contract without reading model data or using the GPU:
 
 ```bash
+python3 scripts/serve.py --dry-run
 python3 scripts/serve.py --profile gsq --dry-run
 python3 scripts/serve.py --profile mx8 --context 131072 --dry-run
 ```
 
 For the larger GSQ configuration, run `python3 scripts/serve.py --profile gsq --context 393216`. This uses 450 GPU experts, a 768 MiB VRAM reserve and 10 workers. The `--context` option accepts caps from 1024 to the model's 1048576-token limit. The cap includes prompt and generated tokens. `--fit-max-tokens` caps output at the remaining window. GSQ at 270336 uses automatic expert placement, a 768 MiB reserve and 8 workers. Other contexts use automatic sizing, a 512 MiB reserve and 10 workers. Set `--expert-cache`, `--vram-reserve-mib` or `--pool-workers` to override those defaults. `--pool-workers` accepts positive 32-bit integers. Check full prompt fit at your chosen context.
 
-## RTX 5080 measurements
+## Stock GSQ RTX 5080 measurements
+
+These measurements predate the Pi-preview LoRA merge and apply only to the **stock GSQ pack**, not the adapted default.
 
 The reference machine used a 16 GiB RTX 5080, 32 GiB of system RAM and Ubuntu under WSL2. The selected GSQ profile was measured on 2026-11-27 with **265477 cached + 1973 fresh = 267450 input tokens**, occupying **98.93% of the 270336-token window** before generation. Each repeat reports medians of **six measured warm Pi turns**, following a cold request and an excluded warmup. Decode throughput and full Pi turn time are separate measurements.
 
@@ -195,6 +247,7 @@ Reference exact packaged hashes:
 
 | Pack | Bytes | SHA256 |
 | --- | ---: | --- |
+| Pi-preview LoRA + GSQ + DFlash 2 (local reference packaging) | 13451914797 | `8e5cd88cc5c7ae75e08f9a690e48fe86f6bdf30d91af265d2feebf06c14385cb` |
 | GSQ IQ3_S + DFlash 2 | 13451914797 | `1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6c680e` |
 | MX8 + DFlash 2 | 19591671136 | `5c1f52101cd598c1578832f6c17c20a9c72a0a50ede0839b31d971369301907a` |
 
@@ -206,6 +259,7 @@ Reconstruction writes new packaging metadata and offsets. `pack.py` verifies all
 - [ISTA-DASLab GSQ-RCO](https://huggingface.co/ISTA-DASLab/Inkling-2-Mini-GSQ-RCO-GGUF/tree/3e3884f326a07e2df6d01122508c507cdf6f6dd1): IQ3_S quantization, Apache-2.0 metadata.
 - [Jesús Gulfo's Basalt](https://github.com/jesdga95/basalt): engine and converters, MIT; [official MX8 pack](https://huggingface.co/jesdga/Inkling-2-Mini-Basalt/tree/c2afac3adb772e14d77b2ea2ac7068ad4460e932), Apache-2.0.
 - [IncoAI DFlash 2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2/tree/4f9088ea66c21f2b99ed657d1941c306b03e84d2): speculative drafter, Apache-2.0 metadata.
+- [Harness Hub Pi-preview adapter](https://huggingface.co/harness-hub/Inkling-2-Mini-pi-adapted-preview/tree/7788a5325f3223440e2812a02ecc7759f77f344a): experimental Pi LoRA, Apache-2.0 model-card metadata.
 - Basalt contributors to PR #750 and #799 supplied the pinned DFlash/mixed-IQ support used here.
 
 Model-card license metadata was checked from the pinned Hugging Face revisions on 2026-11-27 and saved in `inputs.json`. Downloaded README and license files remain beside their source weights. Preserve these attributions and licenses when redistributing weights. This repository's original setup scripts are under [LICENSE](LICENSE); that license does not replace upstream model, CUDA or dependency licenses.

@@ -2,7 +2,7 @@
 
 ## Selected GSQ profile publication (2026-11-27)
 
-The current default is GSQ at 270336 total tokens, automatic experts, a 768 MiB VRAM reserve and 8 CPU workers. The explicit 393216 configuration uses 450 experts, 768 MiB and 10 workers. MX8 and other-context defaults use automatic experts, 512 MiB and 10 workers. `--pool-workers` can override the count. The API model alias is `inkling-2-mini` and the Pi example sets `contextWindow` to 270336.
+This publication tested stock GSQ at 270336 total tokens, automatic experts, a 768 MiB VRAM reserve and 8 CPU workers. The explicit 393216 configuration uses 450 experts, 768 MiB and 10 workers. MX8 and other-context defaults use automatic experts, 512 MiB and 10 workers. `--pool-workers` can override the count. The API model alias is `inkling-2-mini` and the Pi example sets `contextWindow` to 270336.
 
 The [sanitized benchmark aggregate](benchmarks/gsq-270336.json) records independently collected local results using Basalt tree `0026804d2191e2c55ff7cb4d9eddfa122f4ac511`, matching this recipe's pinned tree, and the reference GSQ pack. No source, dependency or weights pin changed. The benchmark used a local harness and a different local API alias. Publication checks validate the public launcher on the CPU.
 
@@ -82,3 +82,37 @@ Observed Basalt command:
 ```
 
 This check proves the public launcher can express the independently tested settings. Runtime long-context results belong to the coordinator's separate acceptance evidence.
+
+
+## Pi-preview default profile
+
+The speed and context measurements above apply to stock GSQ. In a separate
+local Pi-preview comparison, the first LoRA generation needed a follow-up repair.
+The public recipe preserves the tested 270336 / FP8 / spec 8 / suffix 0 /
+automatic experts / 8 workers / 768 MiB VRAM reserve / 4096 MiB RAM reserve /
+parallel 1 / no vision / fit-output settings and the pinned Basalt tree.
+
+The local accepted pack was 13,451,914,797 bytes with SHA256
+`8e5cd88cc5c7ae75e08f9a690e48fe86f6bdf30d91af265d2feebf06c14385cb`.
+Clean reconstruction can have a different whole-file hash because packaging
+metadata differs. `pi-pack.py` first applies the stock equivalence checks and
+then verifies 96 expected adapted tensor hashes, all 641 untouched tensors
+(including 81 DFlash tensors), unchanged metadata and all section checksums.
+It records the actual output hash used by the launcher.
+
+Publication acceptance on the WSL2 RTX 5080 reused the previously reconstructed,
+verified stock GSQ pack and rebuilt the adapted pack with `bash scripts/prepare-packs.sh`.
+The downloader fetched and verified the pinned adapter from Hugging Face. The
+result was 13,451,914,629 bytes with SHA256
+`c6b9e38a6bcd00fd76fba8acd3683873e544461e0cd08f57cabb51b241fb90a8`.
+All 96 merged tensors matched the reference hashes. The verification also
+confirmed the 641 unchanged tensors, including all 81 DFlash tensors.
+
+`python3 scripts/serve.py --check-sandbox` passed, and `python3 scripts/serve.py`
+loaded the rebuilt default pack at 270336 tokens over its private Unix socket.
+After a fresh `bash scripts/install-pi.sh`, the public Pi launcher returned the
+official [Three.js OrbitControls documentation](https://threejs.org/docs/pages/OrbitControls.html)
+through a live Exa query nested in Code Mode. CPU checks covered Pi startup with
+and without search, missing-credential handling and workspace isolation. The
+explicit stock GSQ (270336 and 393216) and MX8 launch contracts matched their
+previous definitions.

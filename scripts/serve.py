@@ -10,16 +10,18 @@ import subprocess
 
 from download import ROOT, STATE, digest
 
-NAMES = {'gsq': 'Inkling-2-Mini-GSQ-RCO-IQ3_S-DFlash2.basalt',
+NAMES = {'pi': 'Inkling-2-Mini-GSQ-RCO-IQ3_S-DFlash2-Pi-7788a53.basalt',
+         'gsq': 'Inkling-2-Mini-GSQ-RCO-IQ3_S-DFlash2.basalt',
          'mx8': 'Inkling-2-Mini-DFlash2-MX8.basalt'}
-REFERENCE = {'gsq': '1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6c680e',
+REFERENCE = {'pi': '8e5cd88cc5c7ae75e08f9a690e48fe86f6bdf30d91af265d2feebf06c14385cb',
+             'gsq': '1fc2e87ab9fa12446319c1429d9edcda38c541ed0db064ec437b60247e6c680e',
              'mx8': '5c1f52101cd598c1578832f6c17c20a9c72a0a50ede0839b31d971369301907a'}
 
 
 def command(profile, context=None, expert_cache=None, vram_reserve_mib=None, pool_workers=None):
     context = context if context is not None else 270336
-    selected = profile == 'gsq' and context == 270336
-    tuned = profile == 'gsq' and context == 393216
+    selected = profile in ('gsq', 'pi') and context == 270336
+    tuned = profile in ('gsq', 'pi') and context == 393216
     if expert_cache is None and tuned:
         expert_cache = 450
     if vram_reserve_mib is None:
@@ -50,7 +52,7 @@ def sandbox(cuda):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--profile', choices=NAMES, default='gsq')
+    ap.add_argument('--profile', choices=NAMES, default='pi')
     ap.add_argument('--context', type=int,
                     help='total context cap (default: 270336); GSQ larger window: 393216')
     ap.add_argument('--expert-cache', type=int,
