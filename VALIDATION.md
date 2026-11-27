@@ -42,6 +42,8 @@ Assembled both packs using `bash scripts/prepare-packs.sh both` in a separate WS
 
 Launched both from a clean GitHub checkout at `3ddaea7ff86743e2807f09533aadd1bd7616f8f5` using the rebuilt Basalt and reconstructed packs, one profile at a time. Both passed the sandbox visibility check, reported loaded at 270336 tokens, returned 391 from the documented smoke request, completed a synthetic tool call and replayed `reasoning_content` on continuation. The larger-context experiment and six-turn Pi measurements are described in the README.
 
+The subsequent dependency update pins Pillow 13.0.0, the patched version reported by GitHub. The updated virtual environment passed `pip check`, a Pillow image API check and Basalt's server help startup.
+
 ## Explicit context tuning: focused repair check
 
 CPU-only dry-run checks on 2026-11-27 passed after adding `--expert-cache` and `--vram-reserve-mib`:
